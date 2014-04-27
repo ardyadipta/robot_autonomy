@@ -56,7 +56,7 @@ if __name__ == "__main__":
 
     env = openravepy.Environment()
     env.SetViewer('qtcoin')
-    env.GetViewer().SetName('Homework 2 Viewer')
+    env.GetViewer().SetName('Homework 3 Viewer')
 
     # First setup the environment and the robot
     visualize = args.visualize
