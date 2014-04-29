@@ -1,6 +1,8 @@
+import copy
 import numpy, openravepy
 import pylab as pl
 from DiscreteEnvironment import DiscreteEnvironment
+from openravepy import matrixFromAxisAngle
 
 class Control(object):
     def __init__(self, omega_left, omega_right, duration):
@@ -24,6 +26,8 @@ class SimpleEnvironment(object):
 
         self.resolution = resolution
         self.ConstructActions()
+
+        self.env = openravepy.Environment()
 
     def GenerateFootprintFromControl(self, start_config, control, stepsize=0.01):
 
@@ -82,7 +86,6 @@ class SimpleEnvironment(object):
         pl.show()
 
 
-
     def ConstructActions(self):
         # Actions is a dictionary that maps orientation of the robot to
         #  an action set
@@ -92,19 +95,21 @@ class SimpleEnvironment(object):
         grid_coordinate = self.discrete_env.ConfigurationToGridCoord(wc)
 
         # Iterate through each possible starting orientation
+        print("ConstructActions")
         for idx in range(int(self.discrete_env.num_cells[2])):
             self.actions[idx] = []
             grid_coordinate[2] = idx
-            start_config = self.discrete_env.GridCoordToConfiguration(grid_coordinate)
+            start_config = numpy.array(self.discrete_env.GridCoordToConfiguration(grid_coordinate))
 
             actionSet = list()
-            for ul in xrange(-1, 1, 0.2):
-                for ur in xrange(-1, 1, 0.2):
-                    for dt in xrange(0.2, 1, 0.2):
+            for ul in numpy.arange(-1, 1, 0.2):
+                for ur in numpy.arange(-1, 1, 0.2):
+                    for dt in numpy.arange(0.2, 1, 0.2):
                         control = Control(ul, ur, dt)
-                        actionSet.append(Action(control, GenerateFootprintFromControl(start_config, control)))
+                        actionSet.append(Action(control, self.GenerateFootprintFromControl(start_config, control)))
 
             self.actions[idx] = actionSet
+            print("number of actions for config: "+str(start_config)+" = "+str(len(actionSet)))
             # TODO: Here you will construct a set of actions
             #  to be used during the planning process
             #
@@ -113,16 +118,49 @@ class SimpleEnvironment(object):
 
     def GetSuccessors(self, node_id):
 
-        successors = []
+        successors = list()
 
         # TODO: Here you will implement a function that looks
         #  up the configuration associated with the particular node_id
         #  and return a list of node_ids and controls that represent the neighboring
         #  nodes
+        grid_coord = self.discrete_env.NodeIdToGridCoord(node_id)
+        startConfig = self.discrete_env.GridCoordToConfiguration(grid_coord)
+        theta_cord = grid_coord[2]
 
+        validTrajectory = True
+        for x in self.actions[theta_cord]:
+            # x = the action in the self.actions variable
+            for idx in range(len(x.footprint)):
+                currentPosition = startConfig + x.footprint[idx]
 
+                if (self.Collides(currentPosition)):
+                    validTrajectory = False
+                    break
+
+            if validTrajectory == True:
+                successors.append(x)
 
         return successors
+
+
+    def Collides(self, config):
+        x = config[0]
+        y = config[1]
+        theta = config[2]
+
+        transform = matrixFromAxisAngle([0,0,theta])
+        transform[0][3] = x
+        transform[1][3] = y
+
+        # Assigns Transform to Robot and Checks Collision
+        with self.env:
+            for body in self.env.GetBodies():
+                self.robot.SetTransform(transform)
+                if self.robot.GetEnv().CheckCollision(self.robot,body) == True:
+                    return True
+                else:
+                    return False
 
     def ComputeDistance(self, start_id, end_id):
 

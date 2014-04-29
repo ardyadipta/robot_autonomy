@@ -21,20 +21,20 @@ if __name__ == "__main__":
     right_manip = robot.GetManipulator('right_wam')
     robot.SetActiveDOFs(right_manip.GetArmIndices())
     robot.SetActiveDOFValues(right_relaxed)
-        
+
     left_manip = robot.GetManipulator('left_wam')
     robot.SetActiveDOFs(left_manip.GetArmIndices())
     robot.SetActiveDOFValues(left_relaxed)
 
     robot.controller = openravepy.RaveCreateController(robot.GetEnv(), 'IdealController')
-     
+
     # add a table and move the robot into place
     table = env.ReadKinBodyXMLFile('models/objects/table.kinbody.xml')
     env.Add(table)
-    
-    table_pose = numpy.array([[ 0, 0, -1, 0.7], 
-                              [-1, 0,  0, 0], 
-                              [ 0, 1,  0, 0], 
+
+    table_pose = numpy.array([[ 0, 0, -1, 0.7],
+                              [-1, 0,  0, 0],
+                              [ 0, 1,  0, 0],
                               [ 0, 0,  0, 1]])
     table.SetTransform(table_pose)
 
@@ -50,7 +50,7 @@ if __name__ == "__main__":
     tstart = robot.GetTransform()
     hstart = openravepy.misc.DrawAxes(env, tstart)
     hstart.SetShow(True)
-    
+
 
     raw_input('Move robot to goal config and press enter')
     gid = base_env.discrete_env.ConfigurationToNodeId(herb_base.GetCurrentConfiguration())
@@ -72,6 +72,6 @@ if __name__ == "__main__":
 
     raw_input('Press any key to quit.')
 
-    
-    
-    
+
+
+
