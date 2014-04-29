@@ -40,10 +40,10 @@ if __name__ == "__main__":
 
     resolution = [0.1, 0.1, numpy.pi/4.]
     herb_base = SimpleRobot(env, robot)
-    base_env = SimpleEnvironment(herb_base, resolution)
+    base_env = SimpleEnvironment(herb_base, table, resolution)
 
     transform = robot.GetTransform()
-    transform[0][3] = -3
+    transform[0][3] = -1
     transform[1][3] = 0
 
     robot.SetTransform(transform)
@@ -57,7 +57,7 @@ if __name__ == "__main__":
     hstart = openravepy.misc.DrawAxes(env, tstart)
     hstart.SetShow(True)
 
-    transform[0][3] = -1
+    transform[0][3] = 2.5
     transform[1][3] = 0
 
     robot.SetTransform(transform)
@@ -77,6 +77,8 @@ if __name__ == "__main__":
     planner = AStarPlanner(base_env, visualize=False)
     plan = planner.Plan(start_config, goal_config)
     traj = herb_base.ConvertPlanToTrajectory(plan)
+
+    robot.SetTransform(tstart)
 
     raw_input('Press any key to play trajectory')
     herb_base.ExecuteTrajectory(traj)

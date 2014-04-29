@@ -3,6 +3,7 @@ import numpy, openravepy
 import pylab as pl
 from DiscreteEnvironment import DiscreteEnvironment
 from openravepy import matrixFromAxisAngle
+import math
 
 class Control(object):
     def __init__(self, omega_left, omega_right, duration):
@@ -22,19 +23,18 @@ class Action(object):
 
 class SimpleEnvironment(object):
 
-    def __init__(self, herb, resolution):
+    def __init__(self, herb, table, resolution):
         self.herb = herb
         self.robot = herb.robot
         self.boundary_limits = [[-5., -5., -numpy.pi], [5., 5., numpy.pi]]
         lower_limits, upper_limits = self.boundary_limits
         self.discrete_env = DiscreteEnvironment(resolution, lower_limits, upper_limits)
 
+        self.table = table
         self.resolution = resolution
         self.ConstructActions()
 
-        self.env = openravepy.Environment()
-
-    def GenerateFootprintFromControl(self, start_config, control, stepsize=0.01):
+    def GenerateFootprintFromControl(self, start_config, control, stepsize=0.05):
 
         # Extract the elements of the control
         ul = control.ul
@@ -111,7 +111,7 @@ class SimpleEnvironment(object):
             actionSet = list()
             for ul in numpy.arange(-1, 1, 0.25):
                 for ur in numpy.arange(-1, 1, 0.25):
-                    for dt in numpy.arange(0.5, 2, 0.5):
+                    for dt in numpy.arange(0.5, 1, 0.5):
                         control = Control(ul, ur, dt)
                         footprint = self.GenerateFootprintFromControl(start_config, control)
                         # newID = self.discrete_env.ConfigurationToNodeId(footprint[len(footprint)-1])
@@ -147,7 +147,7 @@ class SimpleEnvironment(object):
 
                 if (self.Collides(currentPosition)):
                     validTrajectory = False
-                    print("collision...");
+                    # print("collision...");
                     break
 
             if validTrajectory == True:
@@ -166,13 +166,14 @@ class SimpleEnvironment(object):
         transform[1][3] = y
 
         # Assigns Transform to Robot and Checks Collision
-        with self.env:
-            for body in self.env.GetBodies():
-                self.robot.SetTransform(transform)
-                if self.robot.GetEnv().CheckCollision(self.robot,body) == True:
-                    return True
-                else:
-                    return False
+        with self.herb.env:
+            self.robot.SetTransform(transform)
+            if self.herb.env.CheckCollision(self.robot,self.table) == True:
+                return True
+            else:
+                return False
+            import IPython
+            IPython.embed()
 
     def ComputeDistance(self, start_id, end_id):
 
@@ -186,11 +187,18 @@ class SimpleEnvironment(object):
         # print("Current is: "+str(start)+" Goal is: "+str(end))
 
         # Manhattan distance
-        dist = abs(end[0] - start[0]) + abs(end[1] - start[1]) + abs(end[2] - start[2])
+        # dist = math.sqrt((end[0] - start[0]) * (end[0] - start[0]) + (end[1] - start[1]) * (end[1] - start[1]) + (end[2] - start[2]) * (end[2] - start[2]))
+        dist = math.sqrt((end[0] - start[0]) * (end[0] - start[0]) + (end[1] - start[1]) * (end[1] - start[1]))
+        # dist = abs(end[0] - start[0]) + abs(end[1] - start[1]) + abs(end[2] - start[2])
+
         return dist
 
     def ComputeHeuristicCost(self, start_id, goal_id):
-        dist = self.ComputeDistance(start_id, goal_id)
+        # start = self.discrete_env.NodeIdToConfiguration(start_id)
+        # end = self.discrete_env.NodeIdToConfiguration(goal_id)
+        # dist = 0
+        # dist = dist + (end[0] - start[0])
+        # dist = dist + (end[1] - start[1])
 
-        return dist
-
+        return self.ComputeDistance(start_id, goal_id)
+        # return dist

@@ -1,4 +1,5 @@
 import Queue
+import math
 
 class AStarPlanner(object):
 
@@ -65,13 +66,14 @@ class AStarPlanner(object):
                 startGrid = d_env.NodeIdToGridCoord(cur_id)
                 endGrid = d_env.NodeIdToGridCoord(new_id)
                 difference = [endGrid[0] - startGrid[0], endGrid[1] - startGrid[1], endGrid[2] - startGrid[2]]
+                costToFrom = math.sqrt( difference[0]*difference[0] + difference[1]*difference[1] )
 
                 num_expanded = num_expanded + 1
                 if (costs.get(new_id) is None):
                     #print("Goal id:"+str(goal_id))
-                    costs[new_id] = costs[cur_id] + abs(d_env.resolution[0] * difference[0]) + abs(d_env.resolution[1] * difference[1])
+                    costs[new_id] = costs[cur_id] + costToFrom
 
-                    h = self.planning_env.ComputeHeuristicCost(new_id, goal_id)
+                    h = self.planning_env.ComputeHeuristicCost(new_id, goal_id) * 50
 
                     # print("Heuristic cost for config: " + str(d_env.NodeIdToConfiguration(new_id)) + " is: "+str(h))
 
@@ -82,11 +84,13 @@ class AStarPlanner(object):
 
                     # update parent of new id
                     parents[new_id] = [cur_id, action]
-                else: #check to see if there is a better path to this node???
-                    if (costs[new_id] > costs[cur_id] + abs(d_env.resolution[0] * difference[0]) + abs(d_env.resolution[1] * difference[1])):
-                        costs[new_id] = costs[cur_id] + abs(d_env.resolution[0] * difference[0]) + abs(d_env.resolution[1] * difference[1])
+                else: #check to see if this is a better path to this node???
+                    if (costs[new_id] > costs[cur_id] + costToFrom):
+                        costs[new_id] = costs[cur_id] + costToFrom
+                        # costs[new_id] = costs[cur_id] + abs(d_env.resolution[0] * difference[0]) + abs(d_env.resolution[1] * difference[1])
+                        # costs[new_id] = costs[cur_id] + abs(d_env.resolution[0] * difference[0]) + abs(d_env.resolution[1] * difference[1]) + abs(d_env.resolution[2] * difference[2])
 
-                        h = self.planning_env.ComputeHeuristicCost(new_id, goal_id)
+                        h = self.planning_env.ComputeHeuristicCost(new_id, goal_id) * 50
 
                         # print("Heuristic cost is: "+str(h))
 
