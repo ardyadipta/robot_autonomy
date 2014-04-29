@@ -28,11 +28,13 @@ class SimpleRobot(object):
         return plan
 
     def ExecuteTrajectory(self, traj, stepsize = 0.01):
-        print("Executing: "+str(traj))
+        # print("Executing: "+str(traj))
         # Send the trajectory to the controller and wait for execution to complete
         offset = None
+        count = 00
         for action in traj:
-            print("Action: "+str(action))
+            print("Action: "+str(count))
+            count = count + 1
             config = self.GetCurrentConfiguration()
 
             for fconfig in action.footprint:

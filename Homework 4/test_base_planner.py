@@ -82,7 +82,3 @@ if __name__ == "__main__":
     herb_base.ExecuteTrajectory(traj)
 
     raw_input('Press any key to quit.')
-
-
-
-
