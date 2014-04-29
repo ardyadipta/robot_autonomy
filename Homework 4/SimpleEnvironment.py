@@ -10,7 +10,10 @@ class Control(object):
         self.ul = omega_left
         self.ur = omega_right
         self.dt = duration
+
     def __str__(self):
+        return "ul = "+str(self.ul)+" ur = "+str(self.ur) + " dt ="+str(self.dt)
+    def __repr__(self):
         return "ul = "+str(self.ul)+" ur = "+str(self.ur) + " dt ="+str(self.dt)
 
 class Action(object):
@@ -19,6 +22,8 @@ class Action(object):
         self.footprint = footprint
 
     def __str__(self):
+        return "control = "+str(self.control)+" : footprint = "+str(self.footprint)
+    def __repr__(self):
         return "control = "+str(self.control)+" : footprint = "+str(self.footprint)
 
 class SimpleEnvironment(object):
@@ -109,9 +114,9 @@ class SimpleEnvironment(object):
             addedStuff = dict()
 
             actionSet = list()
-            for ul in numpy.arange(-1, 1, 0.25):
-                for ur in numpy.arange(-1, 1, 0.25):
-                    for dt in numpy.arange(0.5, 1, 0.5):
+            for ul in numpy.arange(-1, 1, 0.2):
+                for ur in numpy.arange(-1, 1, 0.2):
+                    for dt in numpy.arange(0.25, 0.5, 0.25):
                         control = Control(ul, ur, dt)
                         footprint = self.GenerateFootprintFromControl(start_config, control)
                         # newID = self.discrete_env.ConfigurationToNodeId(footprint[len(footprint)-1])

@@ -43,7 +43,7 @@ if __name__ == "__main__":
     base_env = SimpleEnvironment(herb_base, table, resolution)
 
     transform = robot.GetTransform()
-    transform[0][3] = -1
+    transform[0][3] = -3
     transform[1][3] = 0
 
     robot.SetTransform(transform)
@@ -57,7 +57,7 @@ if __name__ == "__main__":
     hstart = openravepy.misc.DrawAxes(env, tstart)
     hstart.SetShow(True)
 
-    transform[0][3] = 2.5
+    transform[0][3] = -1
     transform[1][3] = 0
 
     robot.SetTransform(transform)

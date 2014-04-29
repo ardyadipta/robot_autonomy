@@ -33,7 +33,7 @@ class SimpleRobot(object):
         # print("Executing: "+str(traj))
         # Send the trajectory to the controller and wait for execution to complete
         offset = None
-        count = 00
+        count = 0
         for action in traj:
             print("Action: "+str(count))
             count = count + 1
@@ -43,5 +43,5 @@ class SimpleRobot(object):
                 new_config = fconfig[:]
                 new_config[:2] += config[:2]
                 self.SetCurrentConfiguration(new_config)
-                time.sleep(0.005)
+                time.sleep(0.1)
 
