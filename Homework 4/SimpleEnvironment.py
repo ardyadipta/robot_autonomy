@@ -101,12 +101,17 @@ class SimpleEnvironment(object):
             grid_coordinate[2] = idx
             start_config = numpy.array(self.discrete_env.GridCoordToConfiguration(grid_coordinate))
 
+            addedStuff = dict()
+
             actionSet = list()
-            for ul in numpy.arange(-1, 1, 0.2):
-                for ur in numpy.arange(-1, 1, 0.2):
-                    for dt in numpy.arange(0.2, 1, 0.2):
+            for ul in numpy.arange(-1, 1, 0.25):
+                for ur in numpy.arange(-1, 1, 0.25):
+                    for dt in numpy.arange(0.5, 5, 0.5):
                         control = Control(ul, ur, dt)
-                        actionSet.append(Action(control, self.GenerateFootprintFromControl(start_config, control)))
+                        footprint = self.GenerateFootprintFromControl(start_config, control)
+                        # newID = self.discrete_env.ConfigurationToNodeId(footprint[len(footprint)-1])
+                        # if (addedStuff)
+                        actionSet.append(Action(control, footprint))
 
             self.actions[idx] = actionSet
             print("number of actions for config: "+str(start_config)+" = "+str(len(actionSet)))
@@ -136,6 +141,7 @@ class SimpleEnvironment(object):
 
                 if (self.Collides(currentPosition)):
                     validTrajectory = False
+                    print("collision...");
                     break
 
             if validTrajectory == True:
