@@ -59,6 +59,9 @@ class AStarPlanner(object):
                 actionEndPoint = [startConfig[0] + lastFootprint[0], startConfig[1] + lastFootprint[1], startConfig[2] + lastFootprint[2]]
                 # print("Starting at point: "+str(startConfig)+", ending at: "+str(actionEndPoint))
                 new_id = d_env.ConfigurationToNodeId(actionEndPoint)
+                if (new_id == cur_id):
+                    continue
+
                 startGrid = d_env.NodeIdToGridCoord(cur_id)
                 endGrid = d_env.NodeIdToGridCoord(new_id)
                 difference = [endGrid[0] - startGrid[0], endGrid[1] - startGrid[1], endGrid[2] - startGrid[2]]
@@ -66,7 +69,7 @@ class AStarPlanner(object):
                 num_expanded = num_expanded + 1
                 if (costs.get(new_id) is None):
                     #print("Goal id:"+str(goal_id))
-                    costs[new_id] = costs[cur_id] + d_env.resolution[0] * difference[0] + d_env.resolution[1] * difference[1]
+                    costs[new_id] = costs[cur_id] + abs(d_env.resolution[0] * difference[0]) + abs(d_env.resolution[1] * difference[1])
 
                     h = self.planning_env.ComputeHeuristicCost(new_id, goal_id)
 
@@ -79,21 +82,21 @@ class AStarPlanner(object):
 
                     # update parent of new id
                     parents[new_id] = [cur_id, action]
-                # else: #check to see if there is a better path to this node???
-                #     if (costs[new_id] > costs[cur_id] + d_env.resolution[0] * difference[0] + d_env.resolution[1] * difference[1]):
-                #         costs[new_id] = costs[cur_id] + d_env.resolution[0] * difference[0] + d_env.resolution[1] * difference[1]
+                else: #check to see if there is a better path to this node???
+                    if (costs[new_id] > costs[cur_id] + abs(d_env.resolution[0] * difference[0]) + abs(d_env.resolution[1] * difference[1])):
+                        costs[new_id] = costs[cur_id] + abs(d_env.resolution[0] * difference[0]) + abs(d_env.resolution[1] * difference[1])
 
-                #         h = self.planning_env.ComputeHeuristicCost(new_id, goal_id)
+                        h = self.planning_env.ComputeHeuristicCost(new_id, goal_id)
 
-                #         # print("Heuristic cost is: "+str(h))
+                        # print("Heuristic cost is: "+str(h))
 
-                #         expectedTotal = h + costs[new_id]
+                        expectedTotal = h + costs[new_id]
 
-                #         queueTuple = [expectedTotal, new_id]
-                #         queue.put(queueTuple)
+                        queueTuple = [expectedTotal, new_id]
+                        queue.put(queueTuple)
 
-                #         # update parent of new id
-                #         parents[new_id] = [cur_id, action]
+                        # update parent of new id
+                        parents[new_id] = [cur_id, action]
 
                 if (new_id == goal_id):
                     found_path = True
