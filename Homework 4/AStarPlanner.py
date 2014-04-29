@@ -38,8 +38,8 @@ class AStarPlanner(object):
 
         queue.put([self.planning_env.ComputeHeuristicCost(start_id, goal_id), start_id])
 
-        print("start = "+str(d_env.NodeIdToGridCoord(start_id)))
-        print("end = "+str(d_env.NodeIdToGridCoord(goal_id)))
+        print("start = "+str(d_env.NodeIdToGridCoord(start_id)) + " => "+str(start_id))
+        print("end = "+str(d_env.NodeIdToGridCoord(goal_id)) + " => "+str(goal_id))
 
         cur_id = start_id
         parents[start_id] = [None, None]
@@ -49,7 +49,7 @@ class AStarPlanner(object):
 
         cur_id = queue.get()[1]
         while cur_id != None and found_path == False:
-            print("currently at coord: "+str(d_env.NodeIdToConfiguration(cur_id)))
+            print("currently at config: "+str(d_env.NodeIdToConfiguration(cur_id)))
             # print(d_env.NodeIdToConfiguration(cur_id))
             succ = self.planning_env.GetSuccessors(cur_id)
             # returns a list of actions
@@ -111,12 +111,14 @@ class AStarPlanner(object):
 
         print("creating path from end to start")
         plan.append(parents[goal_id][1])
-        cur = goal_id
+        cur = parents[goal_id][0]
         while cur != start_id:
-            print("parent of node: "+str(cur) +" = "+str(parents[cur_id]))
-            plan.append(parents[cur_id][1])
-            cur = parents[cur_id][0]
-            # print(d_env.NodeIdToConfiguration(cur_id))
+            # import IPython
+            # IPython.embed()
+            print("parent of node: "+str(cur) +" = "+str(parents[cur]))
+            plan.append(parents[cur][1])
+            cur = parents[cur][0]
+            # print(d_env.NodeIdToConfiguration(cur))
 
         if self.visualize:
             self.planning_env.ForcePlot()

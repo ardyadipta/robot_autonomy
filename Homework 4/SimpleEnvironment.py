@@ -9,11 +9,16 @@ class Control(object):
         self.ul = omega_left
         self.ur = omega_right
         self.dt = duration
+    def __str__(self):
+        return "ul = "+str(self.ul)+" ur = "+str(self.ur) + " dt ="+str(self.dt)
 
 class Action(object):
     def __init__(self, control, footprint):
         self.control = control
         self.footprint = footprint
+
+    def __str__(self):
+        return "control = "+str(self.control)+" : footprint = "+str(self.footprint)
 
 class SimpleEnvironment(object):
 
@@ -106,7 +111,7 @@ class SimpleEnvironment(object):
             actionSet = list()
             for ul in numpy.arange(-1, 1, 0.25):
                 for ur in numpy.arange(-1, 1, 0.25):
-                    for dt in numpy.arange(0.5, 5, 0.5):
+                    for dt in numpy.arange(0.5, 2, 0.5):
                         control = Control(ul, ur, dt)
                         footprint = self.GenerateFootprintFromControl(start_config, control)
                         # newID = self.discrete_env.ConfigurationToNodeId(footprint[len(footprint)-1])
@@ -117,7 +122,8 @@ class SimpleEnvironment(object):
             print("number of actions for config: "+str(start_config)+" = "+str(len(actionSet)))
             # TODO: Here you will construct a set of actions
             #  to be used during the planning process
-            #
+
+            # self.PlotActionFootprints(idx)
         return
 
 
