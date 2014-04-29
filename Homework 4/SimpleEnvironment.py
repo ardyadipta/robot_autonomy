@@ -14,7 +14,7 @@ class Action(object):
         self.footprint = footprint
 
 class SimpleEnvironment(object):
-    
+
     def __init__(self, herb, resolution):
         self.herb = herb
         self.robot = herb.robot
@@ -41,7 +41,7 @@ class SimpleEnvironment(object):
             xdot = 0.5 * self.herb.wheel_radius * (ul + ur) * numpy.cos(config[2])
             ydot = 0.5 * self.herb.wheel_radius * (ul + ur) * numpy.sin(config[2])
             tdot = self.herb.wheel_radius * (ul - ur) / self.herb.wheel_distance
-                
+
             # Feed forward the velocities
             if timecount + stepsize > dt:
                 stepsize = dt - timecount
@@ -56,7 +56,7 @@ class SimpleEnvironment(object):
             footprint.append(footprint_config)
 
             timecount += stepsize
-            
+
         # Add one more config that snaps the last point in the footprint to the center of the cell
         nid = self.discrete_env.ConfigurationToNodeId(config)
         snapped_config = self.discrete_env.NodeIdToConfiguration(nid)
@@ -72,23 +72,22 @@ class SimpleEnvironment(object):
         lower_limits, upper_limits = self.boundary_limits
         pl.xlim([lower_limits[0], upper_limits[0]])
         pl.ylim([lower_limits[1], upper_limits[1]])
-        
+
         for action in actions:
             xpoints = [config[0] for config in action.footprint]
             ypoints = [config[1] for config in action.footprint]
             pl.plot(xpoints, ypoints, 'k')
-                     
+
         pl.ion()
         pl.show()
 
-        
+
 
     def ConstructActions(self):
-
         # Actions is a dictionary that maps orientation of the robot to
         #  an action set
         self.actions = dict()
-              
+
         wc = [0., 0., 0.]
         grid_coordinate = self.discrete_env.ConfigurationToGridCoord(wc)
 
@@ -98,11 +97,19 @@ class SimpleEnvironment(object):
             grid_coordinate[2] = idx
             start_config = self.discrete_env.GridCoordToConfiguration(grid_coordinate)
 
+            actionSet = list()
+            for ul in xrange(-1, 1, 0.2):
+                for ur in xrange(-1, 1, 0.2):
+                    for dt in xrange(0.2, 1, 0.2):
+                        control = Control(ul, ur, dt)
+                        actionSet.append(Action(control, GenerateFootprintFromControl(start_config, control)))
+
+            self.actions[idx] = actionSet
             # TODO: Here you will construct a set of actions
             #  to be used during the planning process
             #
-         
-            
+        return
+
 
     def GetSuccessors(self, node_id):
 
@@ -112,27 +119,28 @@ class SimpleEnvironment(object):
         #  up the configuration associated with the particular node_id
         #  and return a list of node_ids and controls that represent the neighboring
         #  nodes
-        
+
+
+
         return successors
 
     def ComputeDistance(self, start_id, end_id):
 
-        dist = 0
-
-        # TODO: Here you will implement a function that 
+        # This is a function that
         # computes the distance between the configurations given
         # by the two node ids
+        start = self.discrete_env.NodeIdToConfiguration(start_id)
+        end = self.discrete_env.NodeIdToConfiguration(end_id)
 
+        # print("Current id is: "+str(start_id)+" Goal id is: "+str(end_id))
+        # print("Current is: "+str(start)+" Goal is: "+str(end))
+
+        # Manhattan distance
+        dist = abs(end[0] - start[0]) + abs(end[1] - start[1]) + abs(end[2] - start[2])
         return dist
 
     def ComputeHeuristicCost(self, start_id, goal_id):
-        
-        cost = 0
+        dist = self.ComputeDistance(start_id, goal_id)
 
-        # TODO: Here you will implement a function that 
-        # computes the heuristic cost between the configurations
-        # given by the two node ids
-        
-        
-        return cost
+        return dist
 

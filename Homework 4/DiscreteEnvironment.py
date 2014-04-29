@@ -1,6 +1,5 @@
 import numpy
 import math
-import copy
 
 class DiscreteEnvironment(object):
 
@@ -19,85 +18,95 @@ class DiscreteEnvironment(object):
         # Figure out the number of grid cells that are in each dimension
         self.num_cells = self.dimension*[0]
         for idx in range(self.dimension):
-            self.num_cells[idx] = numpy.ceil((upper_limits[idx] - lower_limits[idx])/resolution)
+            self.num_cells[idx] = numpy.ceil((upper_limits[idx] - lower_limits[idx]) / resolution[idx])
 
+        # self.test()
+
+    def test(self):
+        start = [-4.9,-4.9]
+        print start
+        out = self.ConfigurationToGridCoord(start)
+        print out
+        config_to_grid_coord = self.GridCoordToConfiguration(out)
+        nodeid = self.ConfigurationToNodeId(start)
+        print nodeid
+        final = self.NodeIdToGridCoord(nodeid)
+        print final
 
     def ConfigurationToNodeId(self, config):
-        
-        # TODO:
+
         # This function maps a node configuration in full configuration
         # space to a node in discrete space
-        #
-        node_id = 0
-        node_id = self.GridCoordToNodeId(self.ConfigurationToGridCoord(config))
+
+        grid_coords = self.ConfigurationToGridCoord(config)
+        node_id = self.GridCoordToNodeId(grid_coords)
         return node_id
 
     def NodeIdToConfiguration(self, nid):
-        
-        # TODO:
+
         # This function maps a node in discrete space to a configuraiton
         # in the full configuration space
-        #
-        config = [0] * self.dimension
-        config = self.GridCoordToConfiguration(self.NodeIdToGridCoord(nid))
+
+        coord = self.NodeIdToGridCoord(nid)
+        config = self.GridCoordToConfiguration(coord)
         return config
-        
+
     def ConfigurationToGridCoord(self, config):
-        
-        # TODO:
+
         # This function maps a configuration in the full configuration space
         # to a grid coordinate in discrete space
-        #     
+
         coord = [0] * self.dimension
-        #coord[0], coord[1] = (-1*self.lower_limits[0])/self.resolution+math.floor(config[0]*(1/self.resolution)), (-1*self.lower_limits[1])/self.resolution+math.floor(config[1]*(1/self.resolution))
-        for i in range(self.dimension):
-        	coord[i] = round((-1*self.lower_limits[i])/self.resolution)+math.floor(config[i]*(1/self.resolution))
+        for x in xrange(0, self.dimension):
+            dimRange = self.upper_limits[x] - self.lower_limits[x]
+            shiftedVal = config[x] + 0.0000001
+            if (shiftedVal >= self.upper_limits[x]):
+                shiftedVal = self.upper_limits[x] - 0.000000001
+            coord[x] = math.floor((shiftedVal - self.lower_limits[x]) / (dimRange) * self.num_cells[x])
+
         return coord
 
     def GridCoordToConfiguration(self, coord):
-        
-        # TODO:
+
         # This function smaps a grid coordinate in discrete space
         # to a configuration in the full configuration space
-        #
+
         config = [0] * self.dimension
-        #config[0], config[1] = round((coord[0]-((-1*self.lower_limits[0])/self.resolution))/(1/self.resolution) + self.resolution/2,4), round((coord[1]-((-1*self.lower_limits[1])/self.resolution))/(1/self.resolution) + self.resolution/2,4)
-        for i in range(self.dimension):
-        	config[i] = round((coord[i]-((-1*self.lower_limits[i])/self.resolution))/(1/self.resolution) + self.resolution/2,4)
+        for x in xrange(0, self.dimension):
+            config[x] = self.lower_limits[x] + coord[x] * self.resolution[x] + (self.resolution[x] / 2)
         return config
 
-    def GridCoordToNodeId(self,coord):
-        
-        # TODO:
-        # This function maps a grid coordinate to the associated
-        # node id 
-        node_id = 0
-        #node_id = coord[0]%((self.upper_limits[0]-self.lower_limits[0])/self.resolution) + coord[1]*((self.upper_limits[1]-self.lower_limits[1])/self.resolution)
-        node_id = coord[0]
-        for i in range(1,self.dimension):
-        	for j in range(i):
-        		coord[i] = coord[i]*((round(self.upper_limits[j])-round(self.lower_limits[j]))/self.resolution)
-        	node_id = node_id + coord[i]	
+    def GridCoordToNodeId(self, coord):
 
-        return (int)(node_id)
+        # This function maps a grid coordinate to the associated
+        # node id
+        #
+        # The idea here is to have the nodeid be directly related to
+        # grid cell number, but with just one dimension instead of 2
+
+        node_id = 0
+        multiplications = 1
+        for i in xrange(0, self.dimension):
+            node_id = node_id + coord[i]*multiplications
+
+            multiplications = multiplications * self.num_cells[i]
+        #print ("Coordinate is: "+str(coord)+" Node is: "+str(node_id))
+        return node_id
 
     def NodeIdToGridCoord(self, node_id):
-        
-        # TODO:
         # This function maps a node id to the associated
         # grid coordinate
-        coord = [0] * self.dimension
-        #coord[0], coord[1] = node_id%((self.upper_limits[0]-self.lower_limits[0])/self.resolution), math.floor(node_id/((self.upper_limits[1]-self.lower_limits[1])/self.resolution))
-        for i in range(1,self.dimension):
-        	c = 1
-        	for j in range(i,self.dimension):
-        		c = c*((self.upper_limits[j]-self.lower_limits[j])/self.resolution)
-        	coord[self.dimension - i] = node_id/c
-        	node_id = node_id%c
-        coord[0] = node_id		
 
+        # List of Zeros the size of the dimension
+        coord = [0] * self.dimension
+        for p in xrange(0, self.dimension):
+            i = (self.dimension-1) - p
+            mult = 1
+            # Power multiplication to get top dimension offset
+            for x in xrange(0, i):
+                mult = mult * self.num_cells[x]
+            # Grab Coordinate and project onto lower dimensional space
+            coord[i] = math.floor(node_id / mult)
+            node_id = node_id - (coord[i] * mult)
 
         return coord
-        
-        
-        
