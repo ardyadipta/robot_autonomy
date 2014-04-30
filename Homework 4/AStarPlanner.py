@@ -132,12 +132,10 @@ class AStarPlanner(object):
         #     self.planning_env.ForcePlot()
 
         plan.reverse()
+        import IPython
+        IPython.embed()
 
         for action in plan:
             print(str(action))
-
-        # f = open('results_wam.txt', 'a')
-        # f.write('Nodes Expanded = %d \n' % num_expanded)
-        # f.close()
 
         return plan

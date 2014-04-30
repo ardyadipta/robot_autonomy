@@ -1,7 +1,6 @@
 import logging, numpy, openravepy
 
 from openravepy import *
-from inversereachability import *
 
 class GraspPlanner(object):
 
@@ -27,28 +26,12 @@ class GraspPlanner(object):
         #  grasping the bottle
         ###################################################################
 
-        # load inverserechability database
-        self.irmodel = inversereachability.InverseReachabilityModel(robot=self.robot)
-        starttime = time.time()
-        print 'loading irmodel'
-        if not self.irmodel.load():
-            print 'do you want to generate irmodel for your robot? it might take several hours'
-            print 'or you can go to http://people.csail.mit.edu/liuhuan/pr2/openrave/openrave_database/ to get the database for PR2'
-            input = raw_input('[Y/n]')
-            if input == 'y' or input == 'Y' or input == '\n' or input == '':
-                class IrmodelOption:
-                    self.irmodel.autogenerate()
-                    self.irmodel.load()
-            else:
-                raise ValueError('')
-        print 'time to load inverse-reachability model: %fs'%(time.time()-starttime)
-
         #alex stuff
         Tgrasp = gmodel.grasps[0]
         print("Tgrasp = "+str(Tgrasp))
         #todo: testGrasp() inside of 1st hw
         contacts, final_config, mindist, volume = gmodel.testGrasp(grasp=Tgrasp, translate = True, forceClosure=True)
-        densityfn,samplerfn,bounds = self.irmodel.computeBaseDistribution(final_config)
+        densityfn,samplerfn,bounds = robot.irmodel.computeBaseDistribution(final_config)
 
         # initialize sampling parameters
         goals = []
