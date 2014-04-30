@@ -71,8 +71,12 @@ class SimpleEnvironment(object):
                 # print  ("Went under... new = "+str(config[2]))
 
             footprint_config = config.copy()
-            footprint_config[:2] -= start_config[:2]
+            footprint_config[2] -= start_config[2]
             footprint.append(footprint_config)
+            if footprint_config[2] != start_config[2]:
+                # import IPython
+                # IPython.embed()
+                pass
 
             timecount += stepsize
 
@@ -136,6 +140,8 @@ class SimpleEnvironment(object):
                                 # print(footprint[len(footprint)-3:])
                                 actionSet.append(Action(control, footprint))
                                 alreadyAdded[nid] = True
+
+
 
             self.actions[idx] = actionSet
             print("number of actions for config: "+str(start_config)+" = "+str(len(actionSet)))
