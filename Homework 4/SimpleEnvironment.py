@@ -125,7 +125,7 @@ class SimpleEnvironment(object):
             actionSet = list()
             for ul in numpy.arange(-1, 1, 0.2):
                 for ur in numpy.arange(-1, 1, 0.2):
-                    for dt in numpy.arange(0.2, 3, 0.2):
+                    for dt in numpy.arange(0.2, 1, 0.2):
                         control = Control(ul, ur, dt)
                         footprint = self.GenerateFootprintFromControl(start_config, control, stepsize = 0.05)
                         # newID = self.discrete_env.ConfigurationToNodeId(footprint[len(footprint)-1])
