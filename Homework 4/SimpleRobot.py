@@ -38,10 +38,10 @@ class SimpleRobot(object):
             print("Action: "+str(count))
             count = count + 1
             config = self.GetCurrentConfiguration()
+            print(config)
 
             for fconfig in action.footprint:
                 new_config = fconfig[:]
-                new_config[:2] += config[:2]
+                new_config[:] += config[:]
                 self.SetCurrentConfiguration(new_config)
-                time.sleep(0.1)
-
+                time.sleep(0.01)
