@@ -248,10 +248,13 @@ class AStarPlanner(object):
         start_node.Hcost = compute_manhattan_distance(start_grid,goal_grid)
         queue.append(start_node)
 
+
+
         while len(queue)!=0:
 
             popped_class = queue.pop()
             child_nodes = generate_child(popped_class.State)
+            # succ = self.planning_env.GetSuccessors(child_nodes)
             children = child_nodes[0]
             moves = child_nodes[1]
             for b in range(len(children)):
