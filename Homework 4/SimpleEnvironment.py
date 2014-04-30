@@ -62,9 +62,13 @@ class SimpleEnvironment(object):
                 stepsize = dt - timecount
             config = config + stepsize*numpy.array([xdot, ydot, tdot])
             if config[2] > numpy.pi:
+                # print  (str(start_config[2])+" Went over... old = "+str(config[2]))
                 config[2] -= 2.*numpy.pi
+                # print  ("Went over... new = "+str(config[2]))
             if config[2] < -numpy.pi:
+                # print  (str(start_config[2])+" Went under... cur = "+str(config[2]))
                 config[2] += 2.*numpy.pi
+                # print  ("Went under... new = "+str(config[2]))
 
             footprint_config = config.copy()
             footprint_config[:2] -= start_config[:2]
@@ -116,16 +120,22 @@ class SimpleEnvironment(object):
             grid_coordinate[2] = idx
             start_config = numpy.array(self.discrete_env.GridCoordToConfiguration(grid_coordinate))
 
+            alreadyAdded = dict()
+
             actionSet = list()
             for ul in numpy.arange(-1, 1, 0.2):
                 for ur in numpy.arange(-1, 1, 0.2):
-                    for dt in numpy.arange(0.25, 0.5, 0.25):
+                    for dt in numpy.arange(0.2, 1, 0.2):
                         control = Control(ul, ur, dt)
-                        footprint = self.GenerateFootprintFromControl(start_config, control)
+                        footprint = self.GenerateFootprintFromControl(start_config, control, stepsize = 0.05)
                         # newID = self.discrete_env.ConfigurationToNodeId(footprint[len(footprint)-1])
                         # if (addedStuff)
                         if footprint != None:
-                            actionSet.append(Action(control, footprint))
+                            nid = self.discrete_env.ConfigurationToNodeId(footprint[len(footprint)-1])
+                            if (alreadyAdded.get(nid) == None):
+                                # print(footprint[len(footprint)-3:])
+                                actionSet.append(Action(control, footprint))
+                                alreadyAdded[nid] = True
 
             self.actions[idx] = actionSet
             print("number of actions for config: "+str(start_config)+" = "+str(len(actionSet)))
@@ -149,18 +159,19 @@ class SimpleEnvironment(object):
         theta_cord = grid_coord[2]
 
         validTrajectory = True
-        for x in self.actions[theta_cord]:
-            # x = the action in the self.actions variable
-            for idx in range(len(x.footprint)):
-                currentPosition = startConfig + x.footprint[idx]
+        with self.herb.env:
+            for x in self.actions[theta_cord]:
+                # x = the action in the self.actions variable
+                for idx in range(len(x.footprint)):
+                    currentPosition = startConfig + x.footprint[idx]
 
-                if (self.Collides(currentPosition)):
-                    validTrajectory = False
-                    # print("collision...");
-                    break
+                    if (self.Collides(currentPosition)):
+                        validTrajectory = False
+                        # print("collision...");
+                        break
 
-            if validTrajectory == True:
-                successors.append(x)
+                if validTrajectory == True:
+                    successors.append(x)
 
         return successors
 
@@ -177,7 +188,7 @@ class SimpleEnvironment(object):
         # Assigns Transform to Robot and Checks Collision
         with self.herb.env:
             self.robot.SetTransform(transform)
-            time.sleep(0.01)
+            # time.sleep(0.01)
             if self.herb.env.CheckCollision(self.robot,self.table) == True:
                 return True
             else:
@@ -195,17 +206,24 @@ class SimpleEnvironment(object):
 
         # Manhattan distance
         # dist = math.sqrt((end[0] - start[0]) * (end[0] - start[0]) + (end[1] - start[1]) * (end[1] - start[1]) + (end[2] - start[2]) * (end[2] - start[2]))
-        dist = math.sqrt((end[0] - start[0]) * (end[0] - start[0]) + (end[1] - start[1]) * (end[1] - start[1]) + (end[2] - start[2]) * (end[2] - start[2]))
+        dist = math.sqrt((end[0] - start[0])*(end[0] - start[0]) * self.resolution[0] \
+            + (end[1] - start[1]) * (end[1] - start[1]) * self.resolution[1] \
+            + (end[2] - start[2]) * (end[2] - start[2]) * self.resolution[2])
         # dist = abs(end[0] - start[0]) + abs(end[1] - start[1]) + abs(end[2] - start[2])
 
         return dist
 
-    def ComputeHeuristicCost(self, start_id, goal_id):
+    def ComputeHeuristicCost(self, start_id, end_id):
         # start = self.discrete_env.NodeIdToConfiguration(start_id)
         # end = self.discrete_env.NodeIdToConfiguration(goal_id)
         # dist = 0
         # dist = dist + (end[0] - start[0])
         # dist = dist + (end[1] - start[1])
 
-        return self.ComputeDistance(start_id, goal_id)
-        # return dist
+        start = self.discrete_env.NodeIdToConfiguration(start_id)
+        end = self.discrete_env.NodeIdToConfiguration(end_id)
+
+        dist = math.sqrt((end[0] - start[0])*(end[0] - start[0]) * self.resolution[0] \
+            + (end[1] - start[1]) * (end[1] - start[1]) * self.resolution[1] \
+            + (end[2] - start[2]) * (end[2] - start[2]) * self.resolution[2] * 0.2)
+        return dist

@@ -58,7 +58,9 @@ class AStarPlanner(object):
                 startConfig = d_env.NodeIdToConfiguration(cur_id)
                 lastFootprint = action.footprint[len(action.footprint)-1]
                 actionEndPoint = [startConfig[0] + lastFootprint[0], startConfig[1] + lastFootprint[1], startConfig[2] + lastFootprint[2]]
-                print(actionEndPoint)
+                # print(lastFootprint)
+                # print(actionEndPoint)
+                # print("\n")
                 # print("Starting at point: "+str(startConfig)+", ending at: "+str(actionEndPoint))
                 new_id = d_env.ConfigurationToNodeId(actionEndPoint)
                 if (new_id == cur_id):
@@ -66,16 +68,15 @@ class AStarPlanner(object):
 
                 startGrid = d_env.NodeIdToGridCoord(cur_id)
                 endGrid = d_env.NodeIdToGridCoord(new_id)
-                difference = [endGrid[0] - startGrid[0], endGrid[1] - startGrid[1], endGrid[2] - startGrid[2]]
-                costToFrom = math.sqrt( difference[0]*difference[0]*self.planning_env.resolution[0] \
-                             + difference[1]*difference[1]*self.planning_env.resolution[1] + difference[2]*difference[2]*self.planning_env.resolution[2] )
+                # difference = [endGrid[0] - startGrid[0], endGrid[1] - startGrid[1], endGrid[2] - startGrid[2]]
+                costToFrom = self.planning_env.ComputeDistance(cur_id, new_id)
 
                 num_expanded = num_expanded + 1
                 if (costs.get(new_id) is None):
                     #print("Goal id:"+str(goal_id))
                     costs[new_id] = costs[cur_id] + costToFrom
 
-                    h = self.planning_env.ComputeHeuristicCost(new_id, goal_id) * 50
+                    h = self.planning_env.ComputeHeuristicCost(new_id, goal_id) * 2
 
                     # print("Heuristic cost for config: " + str(d_env.NodeIdToConfiguration(new_id)) + " is: "+str(h))
 
@@ -119,9 +120,10 @@ class AStarPlanner(object):
         plan.append(parents[goal_id][1])
         cur = parents[goal_id][0]
         while cur != start_id:
-            # import IPython
-            # IPython.embed()
+            import IPython
+            IPython.embed()
             # print("parent of node: "+str(cur) +" = "+str(parents[cur]))
+
             plan.append(parents[cur][1])
             cur = parents[cur][0]
             # print(d_env.NodeIdToConfiguration(cur))
@@ -130,12 +132,10 @@ class AStarPlanner(object):
         #     self.planning_env.ForcePlot()
 
         plan.reverse()
+        import IPython
+        IPython.embed()
 
         for action in plan:
             print(str(action))
-
-        # f = open('results_wam.txt', 'a')
-        # f.write('Nodes Expanded = %d \n' % num_expanded)
-        # f.close()
 
         return plan
