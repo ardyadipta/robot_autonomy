@@ -244,6 +244,9 @@ class AStarPlanner(object):
 
 
         start_node = node(start_grid,None,None,0,0,0)
+        print "start grid: ", start_grid
+        print "goal grid: ", goal_grid
+        print "start node: ", start_node
         start_node.PathCost = compute_manhattan_distance(start_grid,goal_grid)
         start_node.Hcost = compute_manhattan_distance(start_grid,goal_grid)
         queue.append(start_node)
@@ -251,15 +254,23 @@ class AStarPlanner(object):
         while len(queue)!=0:
 
             popped_class = queue.pop()
+            print "current node: ", popped_class.State
             child_nodes = generate_child(popped_class.State)
+            # print "child nodes: ", child_nodes
             children = child_nodes[0]
+            print "children: ", children
             moves = child_nodes[1]
+            # print "moves: ", moves
+
             for b in range(len(children)):
                 cond = 0
  
                 if children[b] in visited_states:
                    cond = 1
                    continue
+
+                if self.planning_env.Collides(self.planning_env.discrete_env.GridCoordToConfiguration(children[b])):
+                    print "children[b]: ", children[b], " Collides"
                                   
                 if cond == 0 and self.planning_env.Collides(self.planning_env.discrete_env.GridCoordToConfiguration(children[b]))== False:
                     h = compute_manhattan_distance(children[b],goal_grid)
