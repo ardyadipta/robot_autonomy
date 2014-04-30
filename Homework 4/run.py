@@ -68,6 +68,11 @@ if __name__ == "__main__":
     if not robot.ikmodel.load():
         robot.ikmodel.autogenerate()
 
+    robot.irmodel = openravepy.databases.inversereachability.InverseReachabilityModel(robot)
+    if not robot.irmodel.load():
+        print "irmodel didnt' load. "
+        robot.irmodel.autogenerate()
+
     # add a table and move the robot into place
     table = env.ReadKinBodyXMLFile('models/objects/table.kinbody.xml')
     env.Add(table)

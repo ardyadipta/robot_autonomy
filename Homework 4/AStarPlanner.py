@@ -120,9 +120,10 @@ class AStarPlanner(object):
         plan.append(parents[goal_id][1])
         cur = parents[goal_id][0]
         while cur != start_id:
-            # import IPython
-            # IPython.embed()
+            import IPython
+            IPython.embed()
             # print("parent of node: "+str(cur) +" = "+str(parents[cur]))
+
             plan.append(parents[cur][1])
             cur = parents[cur][0]
             # print(d_env.NodeIdToConfiguration(cur))

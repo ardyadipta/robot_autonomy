@@ -1,7 +1,7 @@
 import logging, numpy, openravepy
 
 from openravepy import *
-# from inversereachability import *
+from inversereachability import *
 
 class GraspPlanner(object):
 
@@ -41,13 +41,14 @@ class GraspPlanner(object):
                     self.irmodel.load()
             else:
                 raise ValueError('')
-
         print 'time to load inverse-reachability model: %fs'%(time.time()-starttime)
 
+        #alex stuff
         Tgrasp = gmodel.grasps[0]
         print("Tgrasp = "+str(Tgrasp))
-
-        densityfn,samplerfn,bounds = self.irmodel.computeBaseDistribution(Tgrasp)
+        #todo: testGrasp() inside of 1st hw
+        contacts, final_config, mindist, volume = gmodel.testGrasp(grasp=Tgrasp, translate = True, forceClosure=True)
+        densityfn,samplerfn,bounds = self.irmodel.computeBaseDistribution(final_config)
 
         # initialize sampling parameters
         goals = []
