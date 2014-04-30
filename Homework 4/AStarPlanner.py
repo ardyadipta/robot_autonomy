@@ -58,7 +58,9 @@ class AStarPlanner(object):
                 startConfig = d_env.NodeIdToConfiguration(cur_id)
                 lastFootprint = action.footprint[len(action.footprint)-1]
                 actionEndPoint = [startConfig[0] + lastFootprint[0], startConfig[1] + lastFootprint[1], startConfig[2] + lastFootprint[2]]
-                print(actionEndPoint)
+                # print(lastFootprint)
+                # print(actionEndPoint)
+                # print("\n")
                 # print("Starting at point: "+str(startConfig)+", ending at: "+str(actionEndPoint))
                 new_id = d_env.ConfigurationToNodeId(actionEndPoint)
                 if (new_id == cur_id):
@@ -66,16 +68,15 @@ class AStarPlanner(object):
 
                 startGrid = d_env.NodeIdToGridCoord(cur_id)
                 endGrid = d_env.NodeIdToGridCoord(new_id)
-                difference = [endGrid[0] - startGrid[0], endGrid[1] - startGrid[1], endGrid[2] - startGrid[2]]
-                costToFrom = math.sqrt( difference[0]*difference[0]*self.planning_env.resolution[0] \
-                             + difference[1]*difference[1]*self.planning_env.resolution[1] + difference[2]*difference[2]*self.planning_env.resolution[2] )
+                # difference = [endGrid[0] - startGrid[0], endGrid[1] - startGrid[1], endGrid[2] - startGrid[2]]
+                costToFrom = self.planning_env.ComputeDistance(cur_id, new_id)
 
                 num_expanded = num_expanded + 1
                 if (costs.get(new_id) is None):
                     #print("Goal id:"+str(goal_id))
                     costs[new_id] = costs[cur_id] + costToFrom
 
-                    h = self.planning_env.ComputeHeuristicCost(new_id, goal_id) * 50
+                    h = self.planning_env.ComputeHeuristicCost(new_id, goal_id) * 2
 
                     # print("Heuristic cost for config: " + str(d_env.NodeIdToConfiguration(new_id)) + " is: "+str(h))
 
