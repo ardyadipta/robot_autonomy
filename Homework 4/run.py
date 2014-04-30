@@ -68,20 +68,22 @@ if __name__ == "__main__":
     if not robot.ikmodel.load():
         robot.ikmodel.autogenerate()
 
-    # Create environments for planning the arm and base
-    resolution = [args.hres, args.hres, args.tres]
-    herb = HerbRobot(env, robot, args.manip)
-    arm_env = HerbEnvironment(herb)
-    herb_base = SimpleRobot(env, robot)
-    base_env = SimpleEnvironment(herb_base, resolution)
-
-    base_planner = AStarPlanner(base_env, visualize = False)
-    arm_planner = None
-    # TODO: Here initialize your arm planner
-
     # add a table and move the robot into place
     table = env.ReadKinBodyXMLFile('models/objects/table.kinbody.xml')
     env.Add(table)
+
+    # Create environments for planning the arm and base
+    resolution = [args.hres, args.hres, args.tres]
+    herb = HerbRobot(env, robot, args.manip)
+    arm_env = HerbEnvironment(herb, table, [0.1]*7)
+    herb_base = SimpleRobot(env, robot)
+    base_env = SimpleEnvironment(herb_base, table, resolution)
+
+
+    base_planner = AStarPlanner(base_env, visualize = False)
+    arm_planner = AStarPlanner(arm_env, visualize = False)
+    # TODO: Here initialize your arm planner
+
 
     table_pose = numpy.array([[ 0, 0, -1, 0.7],
                               [-1, 0,  0, 0],

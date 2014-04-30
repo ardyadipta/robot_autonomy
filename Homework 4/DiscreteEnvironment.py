@@ -73,7 +73,7 @@ class DiscreteEnvironment(object):
 
         config = [0] * self.dimension
         for x in xrange(0, self.dimension):
-            config[x] = self.lower_limits[x] + coord[x] * self.resolution[x] + (self.resolution[x] / 2)
+            config[x] = self.lower_limits[x] + coord[x] * self.resolution[x] + (self.resolution[x] / 2.0)
         return config
 
     def GridCoordToNodeId(self, coord):

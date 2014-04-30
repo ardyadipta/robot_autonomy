@@ -4,6 +4,7 @@ import pylab as pl
 from DiscreteEnvironment import DiscreteEnvironment
 from openravepy import matrixFromAxisAngle
 import math
+import time
 
 class Control(object):
     def __init__(self, omega_left, omega_right, duration):
@@ -39,7 +40,7 @@ class SimpleEnvironment(object):
         self.resolution = resolution
         self.ConstructActions()
 
-    def GenerateFootprintFromControl(self, start_config, control, stepsize=0.05):
+    def GenerateFootprintFromControl(self, start_config, control, stepsize=0.01):
 
         # Extract the elements of the control
         ul = control.ul
@@ -77,6 +78,10 @@ class SimpleEnvironment(object):
         snapped_config[:2] -= start_config[:2]
         footprint.append(snapped_config)
 
+        start_id = self.discrete_env.ConfigurationToNodeId(start_config)
+        if (nid == start_id):
+            return None
+
         return footprint
 
     def PlotActionFootprints(self, idx):
@@ -111,8 +116,6 @@ class SimpleEnvironment(object):
             grid_coordinate[2] = idx
             start_config = numpy.array(self.discrete_env.GridCoordToConfiguration(grid_coordinate))
 
-            addedStuff = dict()
-
             actionSet = list()
             for ul in numpy.arange(-1, 1, 0.2):
                 for ur in numpy.arange(-1, 1, 0.2):
@@ -121,7 +124,8 @@ class SimpleEnvironment(object):
                         footprint = self.GenerateFootprintFromControl(start_config, control)
                         # newID = self.discrete_env.ConfigurationToNodeId(footprint[len(footprint)-1])
                         # if (addedStuff)
-                        actionSet.append(Action(control, footprint))
+                        if footprint != None:
+                            actionSet.append(Action(control, footprint))
 
             self.actions[idx] = actionSet
             print("number of actions for config: "+str(start_config)+" = "+str(len(actionSet)))
@@ -173,15 +177,13 @@ class SimpleEnvironment(object):
         # Assigns Transform to Robot and Checks Collision
         with self.herb.env:
             self.robot.SetTransform(transform)
+            time.sleep(0.01)
             if self.herb.env.CheckCollision(self.robot,self.table) == True:
                 return True
             else:
                 return False
-            import IPython
-            IPython.embed()
 
     def ComputeDistance(self, start_id, end_id):
-
         # This is a function that
         # computes the distance between the configurations given
         # by the two node ids
@@ -193,7 +195,7 @@ class SimpleEnvironment(object):
 
         # Manhattan distance
         # dist = math.sqrt((end[0] - start[0]) * (end[0] - start[0]) + (end[1] - start[1]) * (end[1] - start[1]) + (end[2] - start[2]) * (end[2] - start[2]))
-        dist = math.sqrt((end[0] - start[0]) * (end[0] - start[0]) + (end[1] - start[1]) * (end[1] - start[1]))
+        dist = math.sqrt((end[0] - start[0]) * (end[0] - start[0]) + (end[1] - start[1]) * (end[1] - start[1]) + (end[2] - start[2]) * (end[2] - start[2]))
         # dist = abs(end[0] - start[0]) + abs(end[1] - start[1]) + abs(end[2] - start[2])
 
         return dist

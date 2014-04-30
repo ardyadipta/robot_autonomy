@@ -39,8 +39,8 @@ class AStarPlanner(object):
 
         queue.put([self.planning_env.ComputeHeuristicCost(start_id, goal_id), start_id])
 
-        print("start = "+str(d_env.NodeIdToGridCoord(start_id)) + " => "+str(start_id))
-        print("end = "+str(d_env.NodeIdToGridCoord(goal_id)) + " => "+str(goal_id))
+        print("start = "+str(d_env.NodeIdToGridCoord(start_id)) + " => "+str(start_id)+" => "+str(d_env.NodeIdToConfiguration(start_id)))
+        print("end = "+str(d_env.NodeIdToGridCoord(goal_id)) + " => "+str(goal_id)+" => "+str(d_env.NodeIdToConfiguration(goal_id)))
 
         cur_id = start_id
         parents[start_id] = [None, None]
@@ -58,6 +58,7 @@ class AStarPlanner(object):
                 startConfig = d_env.NodeIdToConfiguration(cur_id)
                 lastFootprint = action.footprint[len(action.footprint)-1]
                 actionEndPoint = [startConfig[0] + lastFootprint[0], startConfig[1] + lastFootprint[1], startConfig[2] + lastFootprint[2]]
+                print(actionEndPoint)
                 # print("Starting at point: "+str(startConfig)+", ending at: "+str(actionEndPoint))
                 new_id = d_env.ConfigurationToNodeId(actionEndPoint)
                 if (new_id == cur_id):
@@ -66,7 +67,8 @@ class AStarPlanner(object):
                 startGrid = d_env.NodeIdToGridCoord(cur_id)
                 endGrid = d_env.NodeIdToGridCoord(new_id)
                 difference = [endGrid[0] - startGrid[0], endGrid[1] - startGrid[1], endGrid[2] - startGrid[2]]
-                costToFrom = math.sqrt( difference[0]*difference[0] + difference[1]*difference[1] )
+                costToFrom = math.sqrt( difference[0]*difference[0]*self.planning_env.resolution[0] \
+                             + difference[1]*difference[1]*self.planning_env.resolution[1] + difference[2]*difference[2]*self.planning_env.resolution[2] )
 
                 num_expanded = num_expanded + 1
                 if (costs.get(new_id) is None):
@@ -84,23 +86,23 @@ class AStarPlanner(object):
 
                     # update parent of new id
                     parents[new_id] = [cur_id, action]
-                else: #check to see if this is a better path to this node???
-                    if (costs[new_id] > costs[cur_id] + costToFrom):
-                        costs[new_id] = costs[cur_id] + costToFrom
-                        # costs[new_id] = costs[cur_id] + abs(d_env.resolution[0] * difference[0]) + abs(d_env.resolution[1] * difference[1])
-                        # costs[new_id] = costs[cur_id] + abs(d_env.resolution[0] * difference[0]) + abs(d_env.resolution[1] * difference[1]) + abs(d_env.resolution[2] * difference[2])
+                # else: #check to see if this is a better path to this node???
+                #     if (costs[new_id] > costs[cur_id] + costToFrom):
+                #         costs[new_id] = costs[cur_id] + costToFrom
+                #         # costs[new_id] = costs[cur_id] + abs(d_env.resolution[0] * difference[0]) + abs(d_env.resolution[1] * difference[1])
+                #         # costs[new_id] = costs[cur_id] + abs(d_env.resolution[0] * difference[0]) + abs(d_env.resolution[1] * difference[1]) + abs(d_env.resolution[2] * difference[2])
 
-                        h = self.planning_env.ComputeHeuristicCost(new_id, goal_id) * 50
+                #         h = self.planning_env.ComputeHeuristicCost(new_id, goal_id) * 50
 
-                        # print("Heuristic cost is: "+str(h))
+                #         # print("Heuristic cost is: "+str(h))
 
-                        expectedTotal = h + costs[new_id]
+                #         expectedTotal = h + costs[new_id]
 
-                        queueTuple = [expectedTotal, new_id]
-                        queue.put(queueTuple)
+                #         queueTuple = [expectedTotal, new_id]
+                #         queue.put(queueTuple)
 
-                        # update parent of new id
-                        parents[new_id] = [cur_id, action]
+                #         # update parent of new id
+                #         parents[new_id] = [cur_id, action]
 
                 if (new_id == goal_id):
                     found_path = True
