@@ -120,9 +120,10 @@ class AStarPlanner(object):
         plan.append(parents[goal_id][1])
         cur = parents[goal_id][0]
         while cur != start_id:
-            # import IPython
-            # IPython.embed()
+            import IPython
+            IPython.embed()
             # print("parent of node: "+str(cur) +" = "+str(parents[cur]))
+
             plan.append(parents[cur][1])
             cur = parents[cur][0]
             # print(d_env.NodeIdToConfiguration(cur))
@@ -131,12 +132,10 @@ class AStarPlanner(object):
         #     self.planning_env.ForcePlot()
 
         plan.reverse()
+        import IPython
+        IPython.embed()
 
         for action in plan:
             print(str(action))
-
-        # f = open('results_wam.txt', 'a')
-        # f.write('Nodes Expanded = %d \n' % num_expanded)
-        # f.close()
 
         return plan
