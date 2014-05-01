@@ -1,5 +1,6 @@
 import copy
-import numpy, openravepy
+import numpy
+import openravepy
 import pylab as pl
 from DiscreteEnvironment import DiscreteEnvironment
 from openravepy import matrixFromAxisAngle
@@ -115,7 +116,7 @@ class SimpleEnvironment(object):
         self.actions = dict()
 
         wc = [0., 0., 0.]
-        grid_coordinate = self.discrete_env.ConfigurationToGridCoord(wc)
+        grid_coordinate = numpy.array(self.discrete_env.ConfigurationToGridCoord(wc))
 
         # Iterate through each possible starting orientation
         print("ConstructActions")
@@ -124,31 +125,72 @@ class SimpleEnvironment(object):
             grid_coordinate[2] = idx
             start_config = numpy.array(self.discrete_env.GridCoordToConfiguration(grid_coordinate))
 
-            alreadyAdded = dict()
+            # alreadyAdded = dict()
 
-            actionSet = list()
-            for ul in numpy.arange(-1, 1, 0.2):
-                for ur in numpy.arange(-1, 1, 0.2):
-                    for dt in numpy.arange(0.2, 1, 0.2):
-                        control = Control(ul, ur, dt)
-                        footprint = self.GenerateFootprintFromControl(start_config, control, stepsize = 0.05)
-                        # newID = self.discrete_env.ConfigurationToNodeId(footprint[len(footprint)-1])
-                        # if (addedStuff)
-                        if footprint != None:
-                            nid = self.discrete_env.ConfigurationToNodeId(footprint[len(footprint)-1])
-                            if (alreadyAdded.get(nid) == None):
-                                # print(footprint[len(footprint)-3:])
-                                actionSet.append(Action(control, footprint))
-                                alreadyAdded[nid] = True
+            # actionSet = list()
+            # for ul in numpy.arange(-1, 1, 0.2):
+            #     for ur in numpy.arange(-1, 1, 0.2):
+                    # for dt in numpy.arange(0.2, 1, 0.2):
+                        # control = Control(ul, ur, dt)
+                        # footprint = self.GenerateFootprintFromControl(start_config, control, stepsize = 0.05)
+                        # # newID = self.discrete_env.ConfigurationToNodeId(footprint[len(footprint)-1])
+                        # # if (addedStuff)
+                        # if footprint != None:
+                        #     nid = self.discrete_env.ConfigurationToNodeId(footprint[len(footprint)-1])
+                        #     if (alreadyAdded.get(nid) == None):
+                        #         # print(footprint[len(footprint)-3:])
+                        #         actionSet.append(Action(control, footprint))
+                        #         alreadyAdded[nid] = True
 
+            if idx == 0:
+                forward = numpy.array([-1, 1 ,0])
+                back = numpy.array([1, -1, 0])
+                left = numpy.array([0, 0, 3])
+                right = numpy.array([0, 0, 1])
+            elif idx == 1:
+                forward = numpy.array([1, 1 ,0 ])
+                back =    numpy.array([-1, -1, 0])
+                left =    numpy.array([0, 0 ,-1])
+                right =   numpy.array([0, 0, 1])
+            elif idx == 2:
+                forward = numpy.array([1, -1 ,0 ])
+                back =    numpy.array([-1, 1, 0])
+                left =    numpy.array([0, 0 ,-1])
+                right =   numpy.array([0, 0, 1])
+            elif idx == 3:
+                forward = numpy.array([-1, -1 ,0 ])
+                back =    numpy.array([1, 1, 0])
+                left =    numpy.array([0, 0 ,-1])
+                right =   numpy.array([0, 0 ,-3])
 
+            fcontrol = Control(1,1,1)
+            bcontrol = Control(-1,-1,1)
+            rcontrol = Control(1,-1,1)
+            lcontrol = Control(-1,1,1)
 
-            self.actions[idx] = actionSet
-            print("number of actions for config: "+str(start_config)+" = "+str(len(actionSet)))
+            # Add forward one...
+            self.actions[idx]
+            ffootprint = [self.discrete_env.GridCoordToConfiguration(forward) + start_config]
+            bfootprint = [self.discrete_env.GridCoordToConfiguration(back) + start_config]
+            lfootprint = [self.discrete_env.GridCoordToConfiguration(left) + start_config]
+            rfootprint = [self.discrete_env.GridCoordToConfiguration(right) + start_config]
+
+            self.actions[idx].append(Action(fcontrol,ffootprint))
+            self.actions[idx].append(Action(bcontrol,bfootprint))
+            self.actions[idx].append(Action(rcontrol,rfootprint))
+            self.actions[idx].append(Action(lcontrol,lfootprint))
+
+            print('actions['+str(idx)+" = "+str(self.actions[idx]))
+
+            # self.actions[idx] = actionSet
+            # print("number of actions for config: "+str(start_config)+" = "+str(len(actionSet)))
+            # print (str(start_config))
             # TODO: Here you will construct a set of actions
             #  to be used during the planning process
 
-            # self.PlotActionFootprints(idx)
+            self.PlotActionFootprints(idx)
+            import IPython
+            IPython.embed()
         return
 
 
@@ -166,6 +208,8 @@ class SimpleEnvironment(object):
 
         validTrajectory = True
         with self.herb.env:
+            if (theta_cord <0 or theta_cord > 3):
+                IPython.embed()
             for x in self.actions[theta_cord]:
                 # x = the action in the self.actions variable
                 for idx in range(len(x.footprint)):
@@ -212,9 +256,9 @@ class SimpleEnvironment(object):
 
         # Manhattan distance
         # dist = math.sqrt((end[0] - start[0]) * (end[0] - start[0]) + (end[1] - start[1]) * (end[1] - start[1]) + (end[2] - start[2]) * (end[2] - start[2]))
-        dist = math.sqrt((end[0] - start[0])*(end[0] - start[0]) * self.resolution[0] \
-            + (end[1] - start[1]) * (end[1] - start[1]) * self.resolution[1] \
-            + (end[2] - start[2]) * (end[2] - start[2]) * self.resolution[2])
+        dist = math.sqrt((end[0] - start[0])*(end[0] - start[0]) * self.resolution[0] 
+            + (end[1] - start[1]) * (end[1] - start[1]) * self.resolution[1])
+            # + (end[2] - start[2]) * (end[2] - start[2]) * self.resolution[2])
         # dist = abs(end[0] - start[0]) + abs(end[1] - start[1]) + abs(end[2] - start[2])
 
         return dist
@@ -230,6 +274,6 @@ class SimpleEnvironment(object):
         end = self.discrete_env.NodeIdToConfiguration(end_id)
 
         dist = math.sqrt((end[0] - start[0])*(end[0] - start[0]) * self.resolution[0] \
-            + (end[1] - start[1]) * (end[1] - start[1]) * self.resolution[1] \
-            + (end[2] - start[2]) * (end[2] - start[2]) * self.resolution[2] * 0.2)
+            + (end[1] - start[1]) * (end[1] - start[1]) * self.resolution[1])
+            # + (end[2] - start[2]) * (end[2] - start[2]) * self.resolution[2] * 0.2)
         return dist

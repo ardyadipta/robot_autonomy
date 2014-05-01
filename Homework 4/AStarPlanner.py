@@ -32,6 +32,9 @@ class AStarPlanner(object):
         d_env = self.planning_env.discrete_env
         start_id = d_env.ConfigurationToNodeId(start_config)
         goal_id = d_env.ConfigurationToNodeId(goal_config)
+        if (self.planning_env.Collides(d_env.NodeIdToConfiguration(goal_id))):
+            print("ERROR: goal is in collision. cannot plan")
+            return []
 
         parents = dict()
         costs = dict()

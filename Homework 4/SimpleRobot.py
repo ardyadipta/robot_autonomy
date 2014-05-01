@@ -39,8 +39,8 @@ class SimpleRobot(object):
             count = count + 1
             config = self.GetCurrentConfiguration()
             print(config)
-            import IPython
-            IPython.embed()
+            # import IPython
+            # IPython.embed()
 
             for fconfig in action.footprint:
                 new_config = fconfig[:]
