@@ -121,7 +121,7 @@ class AStarPlanner(object):
         cur = parents[goal_id][0]
         while cur != start_id:
             import IPython
-            IPython.embed()
+            #IPython.embed()
             # print("parent of node: "+str(cur) +" = "+str(parents[cur]))
 
             plan.append(parents[cur][1])
@@ -133,7 +133,7 @@ class AStarPlanner(object):
 
         plan.reverse()
         import IPython
-        IPython.embed()
+        #IPython.embed()
 
         for action in plan:
             print(str(action))

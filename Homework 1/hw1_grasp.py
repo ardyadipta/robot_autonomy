@@ -250,6 +250,7 @@ if __name__ == '__main__':
   robo = RoboHandler()
   import IPython
   IPython.embed()
+  robo.show_grasp()
   #time.sleep(10000) #to keep the openrave window open
 
   

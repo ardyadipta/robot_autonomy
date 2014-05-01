@@ -26,7 +26,9 @@ class HerbEnvironment(object):
         # table_pose = numpy.array([[ 0, 0, -1, 0.7],
         #                           [-1, 0,  0, 0],
         #                           [ 0, 1,  0, 0],
-        #                           [ 0, 0,  0, 1]])
+        #                           [ 0, 0,  0, 1
+
+        
         # self.table.SetTransform(table_pose)
 
         # set the camera
@@ -104,7 +106,7 @@ class HerbEnvironment(object):
 
         dist = 0
         for x in xrange(0, self.discrete_env.dimension):
-            dist = dist + (abs(end_grid[x] - start_grid[x]) * self.discrete_env.resolution)
+            dist = dist + (abs(end_grid[x] - start_grid[x]) * self.discrete_env.resolution[x])
 
         return dist
 
