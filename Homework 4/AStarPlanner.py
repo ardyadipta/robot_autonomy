@@ -76,7 +76,7 @@ class AStarPlanner(object):
                     #print("Goal id:"+str(goal_id))
                     costs[new_id] = costs[cur_id] + costToFrom
 
-                    h = self.planning_env.ComputeHeuristicCost(new_id, goal_id) * 2
+                    h = self.planning_env.ComputeHeuristicCost(new_id, goal_id) * 50
 
                     # print("Heuristic cost for config: " + str(d_env.NodeIdToConfiguration(new_id)) + " is: "+str(h))
 
@@ -117,6 +117,7 @@ class AStarPlanner(object):
                 cur_id = queue.get()[1]
 
         print("creating path from end to start")
+        
         plan.append(parents[goal_id][1])
         cur = parents[goal_id][0]
         while cur != start_id:
@@ -127,6 +128,8 @@ class AStarPlanner(object):
             plan.append(parents[cur][1])
             cur = parents[cur][0]
             # print(d_env.NodeIdToConfiguration(cur))
+            if cur == start_id:
+                break
 
         # if self.visualize:
         #     self.planning_env.ForcePlot()
