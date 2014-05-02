@@ -3,6 +3,7 @@ import IPython
 import time
 import numpy as np
 from numpy import inf
+import math
 #from hw1_grasp import RoboHandler
 
 from HerbRobot import HerbRobot
@@ -58,14 +59,14 @@ class GraspPlanner(object):
 		if not self.gmodel.load():
 			self.gmodel.autogenerate()
 
-		self.grasps=self.gmodel.grasps
+		self.grasps = self.gmodel.grasps
 		grasps_ordered = self.order_grasps()
-		self.irodel=self.ikmodel
+		
 
 		base_pose = None
 		grasp_config = None
 
-		IPython.embed()
+		#IPython.embed()
         ###################################################################
         # TODO: Here you will fill in the function to compute
         #  a base pose and associated grasp config for the
@@ -133,9 +134,10 @@ class GraspPlanner(object):
 								numfailures += 1
 						else:
 							print ("didn't get nothin")
+			IPython.embed()
 			base_pose = values_location
 			grasp_config = q
-			IPython.embed()
+			#IPython.embed()
 		return base_pose, grasp_config
 
 
@@ -154,26 +156,27 @@ class GraspPlanner(object):
         # # Now plan to the base pose
         start_pose = numpy.array(self.base_planner.planning_env.herb.GetCurrentConfiguration())
         #base_pose = [-1,0,0]
-        IPython.embed()
-        base_plan = self.base_planner.Plan(start_pose, base_pose)
+        new_base_pose = [base_pose[0][3], base_pose[1][3], math.acos(base_pose[0][0])]
+        #IPython.embed()
+        base_plan = self.base_planner.Plan(start_pose, new_base_pose)
         
         base_traj = self.base_planner.planning_env.herb.ConvertPlanToTrajectory(base_plan)
 
         print 'Executing base trajectory'
-        self.robot.ExecuteTrajectory(base_traj)
-        IPython.embed()
+        self.base_planner.planning_env.herb.ExecuteTrajectory(base_traj)
+        #IPython.embed()
         # Now plan the arm to the grasp configuration
         
         self.robot.SetTransform(base_pose)
-        IPython.embed()
+        #IPython.embed()
 
 
         start_config = self.robot.GetActiveDOFValues()
         self.robot.SetActiveDOFValues(grasp_config)
 
-        IPython.embed()
+        #IPython.embed()
         arm_plan = self.arm_planner.Plan(start_config, grasp_config)
-        IPython.embed()
+        #IPython.embed()
 
         # Create a trajectory
         traj = openravepy.RaveCreateTrajectory(self.robot.GetEnv(), 'GenericTrajectory')
@@ -189,13 +192,13 @@ class GraspPlanner(object):
 
         arm_traj = traj
 
-        IPython.embed()
+        #IPython.embed()
         print 'Executing arm trajectory'
         # Send the trajectory to the controller and wait for execution to complete
         self.robot.GetController().SetPath(arm_traj)
         self.robot.WaitForController(0)
 
-        IPython.embed()
+        #IPython.embed()
 
         # Grasp the bottle
         task_manipulation = openravepy.interfaces.TaskManipulation(self.robot)
