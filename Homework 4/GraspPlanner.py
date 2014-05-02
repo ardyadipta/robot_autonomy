@@ -55,13 +55,15 @@ class GraspPlanner(object):
         # Load grasp database
 		self.gmodel = openravepy.databases.grasping.GraspingModel(self.robot, obj)
 		self.graspindices = self.gmodel.graspindices
-		self.grasps = self.gmodel.grasps
-		if not self.gmodel.load():
-			self.gmodel.autogenerate()
 
-		self.grasps=self.gmodel.grasps
-		grasps_ordered = self.order_grasps()
-		self.irodel=self.ikmodel
+        if not self.gmodel.load():
+                self.gmodel.autogenerate()
+
+        self.grasps = self.gmodel.grasps
+        grasps_ordered = self.order_grasps()
+
+        self.irodel=self.ikmodel
+
 
 		base_pose = None
 		grasp_config = None
@@ -79,7 +81,7 @@ class GraspPlanner(object):
 
 		counter = 0
         # initialize sampling parameters
-        
+
         #timeout = inf
 		N = 5
 		with self.robot:
@@ -133,6 +135,7 @@ class GraspPlanner(object):
 								numfailures += 1
 						else:
 							print ("didn't get nothin")
+			IPython.embed()
 			base_pose = values_location
 			grasp_config = q
 		return base_pose, grasp_config
@@ -148,33 +151,26 @@ class GraspPlanner(object):
         if base_pose is None or grasp_config is None:
             print 'Failed to find solution'
             exit()
-        
+
 
         # # Now plan to the base pose
         start_pose = numpy.array(self.base_planner.planning_env.herb.GetCurrentConfiguration())
         #base_pose = [-1,0,0]
         new_base_pose = [base_pose[0][3], base_pose[1][3], math.acos(base_pose[0][0])]
-        # IPython.embed()
+
         base_plan = self.base_planner.Plan(start_pose, new_base_pose)
-        
+
         base_traj = self.base_planner.planning_env.herb.ConvertPlanToTrajectory(base_plan)
 
         print 'Executing base trajectory'
-        # IPython.embed()
-        self.base_planner.planning_env.herb.ExecuteTrajectory(base_traj)
-        # IPython.embed()
-        # Now plan the arm to the grasp configuration
-        
-        # self.robot.SetTransform(base_pose)
-        # IPython.embed()
+        self.robot.SetTransform(base_pose)
 
 
         start_config = self.robot.GetActiveDOFValues()
         self.robot.SetActiveDOFValues(grasp_config)
 
-        # IPython.embed()
         arm_plan = self.arm_planner.Plan(start_config, grasp_config)
-        # IPython.embed()
+
 
         # Create a trajectory
         traj = openravepy.RaveCreateTrajectory(self.robot.GetEnv(), 'GenericTrajectory')
@@ -190,13 +186,10 @@ class GraspPlanner(object):
 
         arm_traj = traj
 
-        # IPython.embed()
         print 'Executing arm trajectory'
         # Send the trajectory to the controller and wait for execution to complete
         self.robot.GetController().SetPath(arm_traj)
         self.robot.WaitForController(0)
-
-        # IPython.embed()
 
         # Grasp the bottle
         task_manipulation = openravepy.interfaces.TaskManipulation(self.robot)
@@ -211,8 +204,8 @@ class GraspPlanner(object):
 		#initialize a martix to hold the scores
 
 		for grasp_no in range(len(self.grasps_ordered)):
-			score_set[grasp_no] = self.eval_grasps(self.grasps_ordered[grasp_no])   
-      	#find the scores of all the grasps by call the eval_grasp function 
+			score_set[grasp_no] = self.eval_grasps(self.grasps_ordered[grasp_no])
+      	#find the scores of all the grasps by call the eval_grasp function
 			score_normalized = np.divide(score_set,np.sum(np.transpose(score_set),1))
     	#is same as dividing each value by sum of its columns , is the L1 norm
 
@@ -227,7 +220,7 @@ class GraspPlanner(object):
 			self.grasps_ordered[grasp_no][self.graspindices.get('performance')] =np.sum(np.multiply(score_normalized[grasp_no],weights_array))
 		#    take the bitwise multiplication of the scores with weigths, and add them up. resultant should be one value
 
-	    #set the score to each grasp 
+	    #set the score to each grasp
 	    # sort!
 		order = np.argsort(self.grasps_ordered[:,self.graspindices.get('performance')[0]])
 		order = order[::-1]
@@ -255,7 +248,7 @@ class GraspPlanner(object):
 					eigen_array = np.linalg.svd(G)[1] #could go for one liner, but it means computing svd twice
 	      #use a  try staement to handle the svd error that we get in the very few grasps that go bad
 
-					return np.array([np.min(eigen_array[np.nonzero(eigen_array)])/np.max(eigen_array[np.nonzero(eigen_array)]),  np.min(eigen_array[np.nonzero(eigen_array)]), np.prod(eigen_array[np.nonzero(eigen_array)])])  
+					return np.array([np.min(eigen_array[np.nonzero(eigen_array)])/np.max(eigen_array[np.nonzero(eigen_array)]),  np.min(eigen_array[np.nonzero(eigen_array)]), np.prod(eigen_array[np.nonzero(eigen_array)])])
 
 				except np.linalg.linalg.LinAlgError:
 					return np.array([0,0,0])
@@ -263,4 +256,4 @@ class GraspPlanner(object):
 			except openravepy.planning_error,e:
 	        #you get here if there is a failure in planning
 	        #example: if the hand is already intersecting the object at the initial position/orientation
-				return  np.array([0,0,0]) 
+				return  np.array([0,0,0])

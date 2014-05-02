@@ -216,8 +216,7 @@ class SimpleEnvironment(object):
         validTrajectory = True
         with self.herb.env:
             if (theta_cord <0 or theta_cord > 3):
-                import IPython
-                IPython.embed()
+                print("ERROR???")
                 return []
             for x in self.actions[theta_cord]:
                 # x = the action in the self.actions variable
