@@ -127,10 +127,6 @@ class AStarPlanner(object):
                 cur_id = queue.get()[1]
 
         print("creating path from end to start")
-
-
-        import IPython
-        IPython.embed()
         plan.append(parents[goal_id][1])
         cur = parents[goal_id][0]
         while cur != start_id:
