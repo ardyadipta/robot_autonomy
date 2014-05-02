@@ -59,9 +59,9 @@ class DiscreteEnvironment(object):
         coord = [0] * self.dimension
         for x in xrange(0, self.dimension):
             dimRange = self.upper_limits[x] - self.lower_limits[x]
-            shiftedVal = config[x] + 0.0000001
+            shiftedVal = config[x]
             if (shiftedVal >= self.upper_limits[x]):
-                shiftedVal = self.upper_limits[x] - 0.000000001
+                shiftedVal = self.upper_limits[x]
             coord[x] = math.floor((shiftedVal - self.lower_limits[x]) / (dimRange) * self.num_cells[x])
 
         return coord

@@ -24,9 +24,9 @@ class Action(object):
         self.footprint = footprint
 
     def __str__(self):
-        return "control = "+str(self.control)+" : footprint = "+str(self.footprint)
+        return "control = "+str(self.control)+" : footprint = "+str(self.footprint[len(self.footprint)-1])
     def __repr__(self):
-        return "control = "+str(self.control)+" : footprint = "+str(self.footprint)
+        return "control = "+str(self.control)+" : footprint = "+str(self.footprint[len(self.footprint)-1])
 
 class SimpleEnvironment(object):
 
@@ -63,21 +63,13 @@ class SimpleEnvironment(object):
                 stepsize = dt - timecount
             config = config + stepsize*numpy.array([xdot, ydot, tdot])
             if config[2] > numpy.pi:
-                # print  (str(start_config[2])+" Went over... old = "+str(config[2]))
                 config[2] -= 2.*numpy.pi
-                # print  ("Went over... new = "+str(config[2]))
             if config[2] < -numpy.pi:
-                # print  (str(start_config[2])+" Went under... cur = "+str(config[2]))
                 config[2] += 2.*numpy.pi
-                # print  ("Went under... new = "+str(config[2]))
 
             footprint_config = config.copy()
             footprint_config[2] -= start_config[2]
             footprint.append(footprint_config)
-            if footprint_config[2] != start_config[2]:
-                # import IPython
-                # IPython.embed()
-                pass
 
             timecount += stepsize
 
@@ -127,70 +119,85 @@ class SimpleEnvironment(object):
 
             # alreadyAdded = dict()
 
-            # actionSet = list()
-            # for ul in numpy.arange(-1, 1, 0.2):
-            #     for ur in numpy.arange(-1, 1, 0.2):
-                    # for dt in numpy.arange(0.2, 1, 0.2):
-                        # control = Control(ul, ur, dt)
-                        # footprint = self.GenerateFootprintFromControl(start_config, control, stepsize = 0.05)
-                        # # newID = self.discrete_env.ConfigurationToNodeId(footprint[len(footprint)-1])
-                        # # if (addedStuff)
-                        # if footprint != None:
-                        #     nid = self.discrete_env.ConfigurationToNodeId(footprint[len(footprint)-1])
-                        #     if (alreadyAdded.get(nid) == None):
-                        #         # print(footprint[len(footprint)-3:])
-                        #         actionSet.append(Action(control, footprint))
-                        #         alreadyAdded[nid] = True
+            actionSet = list()
+            for ul in numpy.arange(-1, 1.01, 2):
+                for ur in numpy.arange(-1, 1.01, 2):
+                    for dt in numpy.arange(0, 2, 0.05):
+                        control = Control(ul, ur, dt)
+                        footprint = self.GenerateFootprintFromControl(start_config, control, stepsize = 0.05)
+                        # newID = self.discrete_env.ConfigurationToNodeId(footprint[len(footprint)-1])
+                        # if (addedStuff)
+                        if footprint != None:
+                            actionSet.append(Action(control, footprint))
 
-            if idx == 0:
-                forward = numpy.array([-1, 1 ,0])
-                back = numpy.array([1, -1, 0])
-                left = numpy.array([0, 0, 3])
-                right = numpy.array([0, 0, 1])
-            elif idx == 1:
-                forward = numpy.array([1, 1 ,0 ])
-                back =    numpy.array([-1, -1, 0])
-                left =    numpy.array([0, 0 ,-1])
-                right =   numpy.array([0, 0, 1])
-            elif idx == 2:
-                forward = numpy.array([1, -1 ,0 ])
-                back =    numpy.array([-1, 1, 0])
-                left =    numpy.array([0, 0 ,-1])
-                right =   numpy.array([0, 0, 1])
-            elif idx == 3:
-                forward = numpy.array([-1, -1 ,0 ])
-                back =    numpy.array([1, 1, 0])
-                left =    numpy.array([0, 0 ,-1])
-                right =   numpy.array([0, 0 ,-3])
+            # if idx == 0:
+            #     forward = numpy.array([-1, 1 ,0])
+            #     back = numpy.array([1, -1, 0])
+            #     left = numpy.array([0, 0, 3])
+            #     right = numpy.array([0, 0, 1])
+            # elif idx == 1:
+            #     forward = numpy.array([1, 1 ,0 ])
+            #     back =    numpy.array([-1, -1, 0])
+            #     left =    numpy.array([0, 0 ,-1])
+            #     right =   numpy.array([0, 0, 1])
+            # elif idx == 2:
+            #     forward = numpy.array([1, -1 ,0 ])
+            #     back =    numpy.array([-1, 1, 0])
+            #     left =    numpy.array([0, 0 ,-1])
+            #     right =   numpy.array([0, 0, 1])
+            # elif idx == 3:
+            #     forward = numpy.array([-1, -1 ,0 ])
+            #     back =    numpy.array([1, 1, 0])
+            #     left =    numpy.array([0, 0 ,-1])
+            #     right =   numpy.array([0, 0 ,-3])
 
-            fcontrol = Control(1,1,1)
-            bcontrol = Control(-1,-1,1)
-            rcontrol = Control(1,-1,1)
-            lcontrol = Control(-1,1,1)
+            # fcontrol = Control(1,1,1)
+            # bcontrol = Control(-1,-1,1)
+            # rcontrol = Control(1,-1,1)
+            # lcontrol = Control(-1,1,1)
 
-            # Add forward one...
-            self.actions[idx]
-            ffootprint = [self.discrete_env.GridCoordToConfiguration(forward) + start_config]
-            bfootprint = [self.discrete_env.GridCoordToConfiguration(back) + start_config]
-            lfootprint = [self.discrete_env.GridCoordToConfiguration(left) + start_config]
-            rfootprint = [self.discrete_env.GridCoordToConfiguration(right) + start_config]
+            # # Add forward one...
+            # self.actions[idx]
+            # ffootprint = [self.discrete_env.GridCoordToConfiguration(forward + grid_coordinate)]
+            # if ffootprint[0][2] > numpy.pi:
+            #     ffootprint[0][2] -= 2.*numpy.pi
+            # if ffootprint[0][2] < -numpy.pi:
+            #     ffootprint[0][2] += 2.*numpy.pi
 
-            self.actions[idx].append(Action(fcontrol,ffootprint))
-            self.actions[idx].append(Action(bcontrol,bfootprint))
-            self.actions[idx].append(Action(rcontrol,rfootprint))
-            self.actions[idx].append(Action(lcontrol,lfootprint))
+            # bfootprint = [self.discrete_env.GridCoordToConfiguration(back + grid_coordinate)]
+            # if bfootprint[0][2] > numpy.pi:
+            #     bfootprint[0][2] -= 2.*numpy.pi
+            # if bfootprint[0][2] < -numpy.pi:
+            #     bfootprint[0][2] += 2.*numpy.pi
 
+            # lfootprint = [self.discrete_env.GridCoordToConfiguration(left + grid_coordinate)]
+            # if lfootprint[0][2] > numpy.pi:
+            #     lfootprint[0][2] -= 2.*numpy.pi
+            # if lfootprint[0][2] < -numpy.pi:
+            #     lfootprint[0][2] += 2.*numpy.pi
+
+            # rfootprint = [self.discrete_env.GridCoordToConfiguration(right + grid_coordinate)]
+            # if rfootprint[0][2] > numpy.pi:
+            #     rfootprint[0][2] -= 2.*numpy.pi
+            # if rfootprint[0][2] < -numpy.pi:
+            #     rfootprint[0][2] += 2.*numpy.pi
+
+
+            # self.actions[idx].append(Action(fcontrol,ffootprint))
+            # self.actions[idx].append(Action(bcontrol,bfootprint))
+            # self.actions[idx].append(Action(rcontrol,rfootprint))
+            # self.actions[idx].append(Action(lcontrol,lfootprint))
+
+
+            self.actions[idx] = actionSet
             print('actions['+str(idx)+" = "+str(self.actions[idx]))
-
-            # self.actions[idx] = actionSet
-            # print("number of actions for config: "+str(start_config)+" = "+str(len(actionSet)))
+            print("number of actions for config: "+str(start_config)+" = "+str(len(actionSet)))
             # print (str(start_config))
             # TODO: Here you will construct a set of actions
             #  to be used during the planning process
 
             self.PlotActionFootprints(idx)
-            import IPython
-            IPython.embed()
+
         return
 
 
@@ -209,7 +216,9 @@ class SimpleEnvironment(object):
         validTrajectory = True
         with self.herb.env:
             if (theta_cord <0 or theta_cord > 3):
+                import IPython
                 IPython.embed()
+                return []
             for x in self.actions[theta_cord]:
                 # x = the action in the self.actions variable
                 for idx in range(len(x.footprint)):
@@ -256,7 +265,7 @@ class SimpleEnvironment(object):
 
         # Manhattan distance
         # dist = math.sqrt((end[0] - start[0]) * (end[0] - start[0]) + (end[1] - start[1]) * (end[1] - start[1]) + (end[2] - start[2]) * (end[2] - start[2]))
-        dist = math.sqrt((end[0] - start[0])*(end[0] - start[0]) * self.resolution[0] 
+        dist = math.sqrt((end[0] - start[0])*(end[0] - start[0]) * self.resolution[0]
             + (end[1] - start[1]) * (end[1] - start[1]) * self.resolution[1])
             # + (end[2] - start[2]) * (end[2] - start[2]) * self.resolution[2])
         # dist = abs(end[0] - start[0]) + abs(end[1] - start[1]) + abs(end[2] - start[2])

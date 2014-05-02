@@ -1,5 +1,7 @@
 import Queue
-import math
+
+import IPython
+import math, numpy
 
 class AStarPlanner(object):
 
@@ -61,6 +63,11 @@ class AStarPlanner(object):
                 startConfig = d_env.NodeIdToConfiguration(cur_id)
                 lastFootprint = action.footprint[len(action.footprint)-1]
                 actionEndPoint = [startConfig[0] + lastFootprint[0], startConfig[1] + lastFootprint[1], startConfig[2] + lastFootprint[2]]
+
+                if actionEndPoint[2] > numpy.pi:
+                    actionEndPoint[2] -= 2.*numpy.pi
+                if actionEndPoint[2] < -numpy.pi:
+                    actionEndPoint[2] += 2.*numpy.pi
                 # print(lastFootprint)
                 # print(actionEndPoint)
                 # print("\n")
@@ -120,11 +127,13 @@ class AStarPlanner(object):
                 cur_id = queue.get()[1]
 
         print("creating path from end to start")
-        
+
+
+        import IPython
+        IPython.embed()
         plan.append(parents[goal_id][1])
         cur = parents[goal_id][0]
         while cur != start_id:
-            import IPython
             #IPython.embed()
             # print("parent of node: "+str(cur) +" = "+str(parents[cur]))
 
