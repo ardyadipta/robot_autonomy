@@ -1,3 +1,10 @@
+# Author: Ardya Dipta Nandaviri Giri
+# Date : April 18, 2014
+# This code implement the AStar planner
+#  The return path should be a numpy array
+#  of dimension k x n where k is the number of waypoints
+#  and n is the dimension of the robots configuration space
+
 import copy
 
 class AStarPlanner(object):
@@ -10,41 +17,40 @@ class AStarPlanner(object):
 
     def Plan(self, start_config, goal_config):            
 
-        plan = []
-        # TODO: Here you will implement the AStar planner
-        #  The return path should be a numpy array
-        #  of dimension k x n where k is the number of waypoints
-        #  and n is the dimension of the robots configuration space
         #define current,startnode and goalnode as Node objects
-        
         current_node    = Node()
         start_node      = Node()
         goal_node       = Node()
-        neighbors       = []
         
-        #define startnode ID and heuristic cost
+        # Initialize array of nodes
+        neighbors       = [] # Store neighbors of the current node
+        plan            = [] # Store the least cost- nodes so far
+        
+        #define startnode ID and heuristic cost. Get the Node ID from config
         start_node.id= self.planning_env.discrete_env.ConfigurationToNodeId(start_config)
         goal_node.id  = self.planning_env.discrete_env.ConfigurationToNodeId(goal_config)
+        
+        # Compute heuristic cost from the start node
         start_node.h = self.planning_env.ComputeHeuristicCost(start_node.id, goal_node.id)
         start_node.f = start_node.g + start_node.h
-
+        
+        # For debugging
         print "Start Node is: " , start_node.id
         print "Goal Node is: ", goal_node.id 
 
-        #define the goalnode id
-
-        #define openset, closed as Hash Table with key: Node address and value: f score
+        #define openset & closedset as Hash Table with key: Node address; value: f score
         openset     = dict()
         closedset   = dict()
 
         #initialize openset with start node
         openset[start_node] = start_node.f
         
-
         #initialize tentative g_score, which is the g_score of the neighbors
+        # g score is the cost from the start node to the current node
         tentative_g_score = 0
         g_score = 0
 
+        
         while openset: # check when the openset is not empty
             current_node    = copy.copy(find_key(openset, min(openset.values()))) # get the node with smallest value f
             # print "current node is: " , current_node.id
@@ -55,7 +61,6 @@ class AStarPlanner(object):
             for i in range(len(openset)):
                 id_openset.append(openset.keys()[i].id)
             
-
             if (current_node.id == goal_node.id):
                 plan[0] = start_config
                 plan[-1] = goal_config
@@ -68,13 +73,10 @@ class AStarPlanner(object):
                 for i in range(len(openset)):
                     id_openset.append(openset.keys()[i].id)
 
-
-                
                 closedset[current_node] = current_node.f
                 id_closedset = [] #openset ID to check if the nodes ID is already in the openset, since the keys of the openset dictionary is the node itself
                 for i in range(len(closedset)):
                     id_closedset.append(closedset.keys()[i].id)
-
 
                 # print "openset is: ", openset
                 # print "closedset is: ", closedset
@@ -103,8 +105,8 @@ class Node(object):
     def __init__(self):
         self.id = None
         self.f = 0 # f score = g + h
-        self.g = 0
-        self.h = 0 #heuristic distance to goal
+        self.g = 0 # distance from start node to current node
+        self.h = 0 # heuristic distance to goal
 
 
 # find a key in a dict
